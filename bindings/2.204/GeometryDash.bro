@@ -896,6 +896,28 @@ class CCMenuItemSpriteExtra : cocos2d::CCMenuItemSprite {
 	virtual void selected() = win 0x25aa0;
 	virtual void unselected() = win 0x25c80;
 
+	/// Set a new image for this button
+	/// Prefer using this over `setNormalImage` as the latter does not actually 
+	/// handle any of the special sizing operations `CCMenuItemSpriteExtra` has
+	/// @param sprite The sprite to replace this button's sprite with
+	/// @note Geode addition
+	void setSprite(cocos2d::CCSprite* sprite) {
+		this->setNormalImage(sprite);
+		this->updateSprite();
+	}
+	/// Update the sizing of this button's image
+	/// If you for example have a `ButtonSprite` on this button and change the 
+	/// text, you need to call `updateSprite` afterwards to fix the button's 
+	/// content size
+	/// @note Geode addition
+	void updateSprite() {
+		auto sprite = this->getNormalImage();
+		auto size = sprite->getScaledContentSize();
+		sprite->setPosition(size / 2);
+		sprite->setAnchorPoint({ .5f, .5f });
+		this->setContentSize(size);
+	}
+
 	float m_scaleMultiplier;
 	float m_baseScale;
 	bool m_animationEnabled;
@@ -966,6 +988,22 @@ class CCMenuItemToggler : cocos2d::CCMenuItem {
 	virtual void selected() = win 0x260d0;
 	virtual void unselected() = win 0x26130;
 	virtual void setEnabled(bool) = win 0x26160;
+
+	/// Update the sizing of this toggle's image
+	/// If you for example have a `ButtonSprite` on this toggle and change the 
+	/// text, you need to call `updateSprite` afterwards to fix the toggle's 
+	/// content size
+	/// @note Geode addition
+	void updateSprite() {
+		m_offButton->updateSprite();
+		m_onButton->updateSprite();
+		auto size = m_offButton->getScaledContentSize();
+		m_offButton->setPosition(size / 2);
+		m_offButton->setAnchorPoint({ .5f, .5f });
+		m_onButton->setPosition(size / 2);
+		m_onButton->setAnchorPoint({ .5f, .5f });
+		this->setContentSize(size);
+	}
 
 	CCMenuItemSpriteExtra* m_offButton;
 	CCMenuItemSpriteExtra* m_onButton;
@@ -1545,6 +1583,10 @@ class ColorActionSprite : cocos2d::CCNode {
 	static ColorActionSprite* create() = win 0x1d8bf0;
 
 	virtual bool init() = win 0x1d8cb0;
+
+	float m_opacity;
+	cocos2d::ccColor3B m_color;
+	cocos2d::ccColor3B m_copyColor;
 }
 
 [[link(android)]]
@@ -6681,6 +6723,9 @@ class GJEffectManager : cocos2d::CCNode {
 	TodoReturn wouldCreateLoop(InheritanceNode*, int) = win 0x1dbe50;
 
 	virtual bool init() = win 0x1db370;
+
+	PAD = android32 0x90, mac 0xf0, android64 0x120, win 0x9c;
+	cocos2d::CCDictionary* m_colorActionDict;
 }
 
 [[link(android)]]

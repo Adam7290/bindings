@@ -861,6 +861,28 @@ class CCMenuItemSpriteExtra : cocos2d::CCMenuItemSprite {
 	virtual void selected();
 	virtual void unselected();
 
+	/// Set a new image for this button
+	/// Prefer using this over `setNormalImage` as the latter does not actually 
+	/// handle any of the special sizing operations `CCMenuItemSpriteExtra` has
+	/// @param sprite The sprite to replace this button's sprite with
+	/// @note Geode addition
+	void setSprite(cocos2d::CCSprite* sprite) {
+		this->setNormalImage(sprite);
+		this->updateSprite();
+	}
+	/// Update the sizing of this button's image
+	/// If you for example have a `ButtonSprite` on this button and change the 
+	/// text, you need to call `updateSprite` afterwards to fix the button's 
+	/// content size
+	/// @note Geode addition
+	void updateSprite() {
+		auto sprite = this->getNormalImage();
+		auto size = sprite->getScaledContentSize();
+		sprite->setPosition(size / 2);
+		sprite->setAnchorPoint({ .5f, .5f });
+		this->setContentSize(size);
+	}
+
 	float m_scaleMultiplier;
 	float m_baseScale;
 	bool m_animationEnabled;
@@ -926,6 +948,22 @@ class CCMenuItemToggler : cocos2d::CCMenuItem {
 	virtual void selected();
 	virtual void unselected();
 	virtual void setEnabled(bool) = ios 0x198358;
+
+	/// Update the sizing of this toggle's image
+	/// If you for example have a `ButtonSprite` on this toggle and change the 
+	/// text, you need to call `updateSprite` afterwards to fix the toggle's 
+	/// content size
+	/// @note Geode addition
+	void updateSprite() {
+		m_offButton->updateSprite();
+		m_onButton->updateSprite();
+		auto size = m_offButton->getScaledContentSize();
+		m_offButton->setPosition(size / 2);
+		m_offButton->setAnchorPoint({ .5f, .5f });
+		m_onButton->setPosition(size / 2);
+		m_onButton->setAnchorPoint({ .5f, .5f });
+		this->setContentSize(size);
+	}
 
 	CCMenuItemSpriteExtra* m_offButton;
 	CCMenuItemSpriteExtra* m_onButton;
@@ -1499,6 +1537,10 @@ class ColorActionSprite : cocos2d::CCNode {
 	static ColorActionSprite* create();
 
 	virtual bool init();
+
+	float m_opacity;
+	cocos2d::ccColor3B m_color;
+	cocos2d::ccColor3B m_copyColor;
 }
 
 [[link(android)]]
@@ -2932,10 +2974,10 @@ class EditorUI : cocos2d::CCLayer, FLAlertLayerProtocol, ColorSelectDelegate, GJ
 
 	PAD = android32 0xc, android64 0xc;
 	bool m_swipeEnabled;
-	PAD = android32 0x3, android64 0x3;
+	PAD = android32 0x7, android64 0x7;
 	bool m_updatedSpeedObjects;
 
-	PAD = android32 0x1b, android64 0x1f;
+	PAD = android32 0x17, android64 0x1b;
 
 	cocos2d::CCArray* m_selectedObjects; // 0x338 on a64
 
@@ -6596,6 +6638,9 @@ class GJEffectManager : cocos2d::CCNode {
 	TodoReturn wouldCreateLoop(InheritanceNode*, int);
 
 	virtual bool init();
+
+	PAD = android32 0x90, mac 0xf0, android64 0x120, win 0x9c;
+	cocos2d::CCDictionary* m_colorActionDict;
 }
 
 [[link(android)]]
